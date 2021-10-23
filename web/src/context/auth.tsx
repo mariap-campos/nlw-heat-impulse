@@ -21,6 +21,7 @@ type AuthResponse = {
 type AuthContextData = {
     user: User | null;
     signInUrl: string;
+    signOut: () => void;
 }
 type AuthProvider = {
     children: ReactNode;
@@ -42,8 +43,14 @@ export function AuthProvider(props: AuthProvider) {
         const { user, token } = response.data;
 
         localStorage.setItem('@dowhile:token', token);
+        api.defaults.headers.common.authorization =`Bearer ${token}`
         setUser(user);
 
+    }
+
+    function signOut() {
+        setUser(null);
+        localStorage.removeItem('@dowhile:token');
     }
 
     useEffect(() => {
@@ -57,8 +64,6 @@ export function AuthProvider(props: AuthProvider) {
         }
     }, [])
 
-
-
     useEffect(() => {
         const url = window.location.href;
         const hasGithubCode = url.includes('?code=')
@@ -71,7 +76,7 @@ export function AuthProvider(props: AuthProvider) {
         }
     }, [])
     return(
-        <AuthContext.Provider value={{ signInUrl, user }}>
+        <AuthContext.Provider value={{ signInUrl, user, signOut}}>
             {props.children}
         </AuthContext.Provider>
 
